@@ -1,0 +1,325 @@
+.weekly-schedule {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 32px;
+  margin-top: 60px;
+}
+
+.weekly-schedule__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.weekly-schedule__header h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.weekly-schedule__barber-tabs {
+  display: flex;
+  gap: 12px;
+}
+
+.weekly-schedule__barber-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
+  border-radius: 30px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.weekly-schedule__barber-tab:hover {
+  border-color: var(--barber-color);
+  color: var(--text-primary);
+}
+
+.weekly-schedule__barber-tab.active {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.weekly-schedule__barber-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+}
+
+.weekly-schedule__grid-wrapper {
+  overflow-x: auto;
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+
+.weekly-schedule__grid {
+  display: grid;
+  grid-template-columns: 60px repeat(6, minmax(140px, 1fr));
+  min-width: 900px;
+}
+
+.weekly-schedule__time-column {
+  border-right: 1px solid var(--border-color);
+}
+
+.weekly-schedule__time-header {
+  height: 60px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.weekly-schedule__time-slot {
+  height: 60px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-right: 12px;
+  padding-top: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transform: translateY(-8px);
+}
+
+.weekly-schedule__day-column {
+  border-right: 1px solid var(--border-color);
+}
+
+.weekly-schedule__day-column:last-child {
+  border-right: none;
+}
+
+.weekly-schedule__day-header {
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px;
+}
+
+.weekly-schedule__day-name {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.weekly-schedule__day-date {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.weekly-schedule__day-content {
+  position: relative;
+  height: calc(11 * 60px); /* 11 hours * 60px */
+}
+
+.weekly-schedule__hour-line {
+  height: 60px;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.weekly-schedule__hour-line:last-child {
+  border-bottom: none;
+}
+
+.weekly-schedule__appointment {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weekly-schedule__appointment:hover {
+  transform: scale(1.02);
+  z-index: 10;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.weekly-schedule__appointment-time {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.weekly-schedule__appointment-client {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weekly-schedule__appointment-service {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weekly-schedule__legend {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.weekly-schedule__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.weekly-schedule__legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.weekly-schedule__stats {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.weekly-schedule__stats strong {
+  color: var(--accent-gold);
+  font-size: 1.1rem;
+}
+
+/* Modal */
+.weekly-schedule__modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.weekly-schedule__modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  animation: fadeInUp 0.3s ease;
+}
+
+.weekly-schedule__modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.weekly-schedule__modal-close:hover {
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+}
+
+.weekly-schedule__modal-header {
+  padding: 24px;
+  border-bottom: 3px solid;
+}
+
+.weekly-schedule__modal-header h4 {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.weekly-schedule__modal-body {
+  padding: 24px;
+}
+
+.weekly-schedule__modal-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.weekly-schedule__modal-row:last-child {
+  border-bottom: none;
+}
+
+.weekly-schedule__modal-label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.weekly-schedule__modal-value {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .weekly-schedule {
+    padding: 20px;
+  }
+  
+  .weekly-schedule__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .weekly-schedule__barber-tabs {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  
+  .weekly-schedule__barber-tab {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+}
+

@@ -1,0 +1,213 @@
+import { useState } from 'react';
+import './BarberMiniSchedule.css';
+
+// Sample appointments data
+const sampleAppointments = {
+  'Agata': [
+    { id: 1, day: 1, startHour: 9, startMinute: 0, duration: 45, client: 'Marek K.', service: 'Strzyżenie włosów' },
+    { id: 2, day: 1, startHour: 10, startMinute: 30, duration: 60, client: 'Piotr W.', service: 'Włosy + Broda' },
+    { id: 3, day: 1, startHour: 14, startMinute: 0, duration: 45, client: 'Adam S.', service: 'Strzyżenie włosów' },
+    { id: 4, day: 2, startHour: 9, startMinute: 30, duration: 60, client: 'Tomasz B.', service: 'Włosy + Broda' },
+    { id: 5, day: 2, startHour: 12, startMinute: 0, duration: 45, client: 'Michał Z.', service: 'Strzyżenie włosów' },
+    { id: 6, day: 2, startHour: 15, startMinute: 30, duration: 50, client: 'Krzysztof P.', service: 'Pielęgnacja premium' },
+    { id: 7, day: 3, startHour: 10, startMinute: 0, duration: 45, client: 'Jan N.', service: 'Strzyżenie włosów' },
+    { id: 8, day: 3, startHour: 13, startMinute: 0, duration: 60, client: 'Robert M.', service: 'Włosy + Broda' },
+    { id: 9, day: 4, startHour: 9, startMinute: 0, duration: 45, client: 'Paweł L.', service: 'Strzyżenie włosów' },
+    { id: 10, day: 4, startHour: 11, startMinute: 0, duration: 35, client: 'Dawid R.', service: 'Koloryzacja brody' },
+    { id: 11, day: 4, startHour: 14, startMinute: 30, duration: 45, client: 'Łukasz T.', service: 'Strzyżenie włosów' },
+    { id: 12, day: 5, startHour: 10, startMinute: 0, duration: 60, client: 'Grzegorz H.', service: 'Włosy + Broda' },
+    { id: 13, day: 5, startHour: 13, startMinute: 30, duration: 45, client: 'Marcin J.', service: 'Strzyżenie włosów' },
+  ],
+  'Magda': [
+    { id: 14, day: 1, startHour: 10, startMinute: 0, duration: 30, client: 'Wojciech A.', service: 'Strzyżenie brody' },
+    { id: 15, day: 1, startHour: 11, startMinute: 30, duration: 40, client: 'Kamil B.', service: 'Golenie brzytwą' },
+    { id: 16, day: 1, startHour: 15, startMinute: 0, duration: 50, client: 'Andrzej C.', service: 'Pielęgnacja premium' },
+    { id: 17, day: 2, startHour: 9, startMinute: 0, duration: 30, client: 'Szymon D.', service: 'Strzyżenie brody' },
+    { id: 18, day: 2, startHour: 11, startMinute: 0, duration: 40, client: 'Rafał E.', service: 'Golenie brzytwą' },
+    { id: 19, day: 2, startHour: 14, startMinute: 0, duration: 30, client: 'Bartosz F.', service: 'Strzyżenie brody' },
+    { id: 20, day: 3, startHour: 9, startMinute: 30, duration: 50, client: 'Mateusz G.', service: 'Pielęgnacja premium' },
+    { id: 21, day: 3, startHour: 12, startMinute: 0, duration: 30, client: 'Jakub H.', service: 'Strzyżenie brody' },
+    { id: 22, day: 3, startHour: 15, startMinute: 30, duration: 40, client: 'Dominik I.', service: 'Golenie brzytwą' },
+    { id: 23, day: 4, startHour: 10, startMinute: 0, duration: 30, client: 'Sebastian J.', service: 'Strzyżenie brody' },
+    { id: 24, day: 4, startHour: 13, startMinute: 0, duration: 50, client: 'Artur K.', service: 'Pielęgnacja premium' },
+    { id: 25, day: 5, startHour: 9, startMinute: 0, duration: 40, client: 'Norbert L.', service: 'Golenie brzytwą' },
+    { id: 26, day: 5, startHour: 11, startMinute: 30, duration: 30, client: 'Emil M.', service: 'Strzyżenie brody' },
+    { id: 27, day: 5, startHour: 14, startMinute: 0, duration: 30, client: 'Filip N.', service: 'Strzyżenie brody' },
+  ],
+  'Kuba': [
+    { id: 28, day: 1, startHour: 9, startMinute: 30, duration: 45, client: 'Oskar O.', service: 'Strzyżenie włosów' },
+    { id: 29, day: 1, startHour: 12, startMinute: 0, duration: 60, client: 'Igor P.', service: 'Włosy + Broda' },
+    { id: 30, day: 1, startHour: 16, startMinute: 0, duration: 45, client: 'Hubert R.', service: 'Strzyżenie włosów' },
+    { id: 31, day: 2, startHour: 10, startMinute: 0, duration: 45, client: 'Leon S.', service: 'Strzyżenie włosów' },
+    { id: 32, day: 2, startHour: 13, startMinute: 0, duration: 60, client: 'Bruno T.', service: 'Włosy + Broda' },
+    { id: 33, day: 2, startHour: 16, startMinute: 30, duration: 45, client: 'Oliwier U.', service: 'Strzyżenie włosów' },
+    { id: 34, day: 3, startHour: 9, startMinute: 0, duration: 45, client: 'Tymon W.', service: 'Strzyżenie włosów' },
+    { id: 35, day: 3, startHour: 11, startMinute: 0, duration: 60, client: 'Alan X.', service: 'Włosy + Broda' },
+    { id: 36, day: 3, startHour: 14, startMinute: 30, duration: 45, client: 'Kacper Y.', service: 'Strzyżenie włosów' },
+    { id: 37, day: 4, startHour: 9, startMinute: 30, duration: 60, client: 'Nikodem Z.', service: 'Włosy + Broda' },
+    { id: 38, day: 4, startHour: 12, startMinute: 0, duration: 45, client: 'Borys A.', service: 'Strzyżenie włosów' },
+    { id: 39, day: 4, startHour: 15, startMinute: 0, duration: 35, client: 'Ksawery B.', service: 'Koloryzacja brody' },
+    { id: 40, day: 5, startHour: 10, startMinute: 30, duration: 45, client: 'Tymoteusz C.', service: 'Strzyżenie włosów' },
+    { id: 41, day: 5, startHour: 14, startMinute: 0, duration: 60, client: 'Olaf D.', service: 'Włosy + Broda' },
+  ]
+};
+
+const days = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
+const fullDays = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+
+const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) => {
+  const [hoveredSlot, setHoveredSlot] = useState(null);
+  
+  const appointments = sampleAppointments[barber.name] || [];
+
+  // Get current week dates
+  const getWeekDates = () => {
+    const today = new Date();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - today.getDay() + 1);
+    
+    return days.map((_, index) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + index);
+      return date.getDate();
+    });
+  };
+
+  const weekDates = getWeekDates();
+
+  // Check if a slot is busy
+  const isSlotBusy = (dayIndex, hour) => {
+    return appointments.some(apt => {
+      if (apt.day !== dayIndex + 1) return false;
+      const aptStartMinutes = apt.startHour * 60 + apt.startMinute;
+      const aptEndMinutes = aptStartMinutes + apt.duration;
+      const slotStartMinutes = hour * 60;
+      const slotEndMinutes = (hour + 1) * 60;
+      return aptStartMinutes < slotEndMinutes && aptEndMinutes > slotStartMinutes;
+    });
+  };
+
+  // Get appointment for slot
+  const getAppointmentForSlot = (dayIndex, hour) => {
+    return appointments.find(apt => {
+      if (apt.day !== dayIndex + 1) return false;
+      const aptStartMinutes = apt.startHour * 60 + apt.startMinute;
+      const aptEndMinutes = aptStartMinutes + apt.duration;
+      const slotStartMinutes = hour * 60;
+      const slotEndMinutes = (hour + 1) * 60;
+      return aptStartMinutes < slotEndMinutes && aptEndMinutes > slotStartMinutes;
+    });
+  };
+
+  const formatTime = (hour, minute) => {
+    return `${hour}:${minute.toString().padStart(2, '0')}`;
+  };
+
+  // Check if day matches selected date
+  const isDaySelected = (dayIndex) => {
+    if (!selectedDate) return false;
+    const date = new Date(selectedDate);
+    const dayOfWeek = date.getDay();
+    // Convert Sunday=0 to Monday=0 based
+    const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    return adjustedDay === dayIndex;
+  };
+
+  return (
+    <div className={`barber-mini-schedule ${compact ? 'barber-mini-schedule--compact' : ''}`}>
+      <div className="barber-mini-schedule__header">
+        <div className="barber-mini-schedule__barber">
+          <span 
+            className="barber-mini-schedule__avatar" 
+            style={{ background: barber.color }}
+          >
+            {barber.name.charAt(0)}
+          </span>
+          <div className="barber-mini-schedule__info">
+            <span className="barber-mini-schedule__name">{barber.name}</span>
+            <span className="barber-mini-schedule__specialty">{barber.specialty}</span>
+          </div>
+        </div>
+        {onClose && (
+          <button className="barber-mini-schedule__close" onClick={onClose}>
+            ×
+          </button>
+        )}
+      </div>
+
+      <div className="barber-mini-schedule__legend">
+        <div className="barber-mini-schedule__legend-item">
+          <span className="barber-mini-schedule__legend-dot barber-mini-schedule__legend-dot--free"></span>
+          Wolne
+        </div>
+        <div className="barber-mini-schedule__legend-item">
+          <span className="barber-mini-schedule__legend-dot barber-mini-schedule__legend-dot--busy" style={{ background: barber.color }}></span>
+          Zajęte
+        </div>
+      </div>
+
+      <div className="barber-mini-schedule__grid-wrapper">
+        <div className="barber-mini-schedule__grid">
+          {/* Header row with days */}
+          <div className="barber-mini-schedule__corner"></div>
+          {days.map((day, index) => (
+            <div 
+              key={day} 
+              className={`barber-mini-schedule__day-header ${isDaySelected(index) ? 'selected' : ''}`}
+            >
+              <span className="barber-mini-schedule__day-name">{day}</span>
+              <span className="barber-mini-schedule__day-date">{weekDates[index]}</span>
+            </div>
+          ))}
+
+          {/* Time rows */}
+          {hours.map((hour) => (
+            <>
+              <div key={`time-${hour}`} className="barber-mini-schedule__time">
+                {hour}:00
+              </div>
+              {days.map((_, dayIndex) => {
+                const busy = isSlotBusy(dayIndex, hour);
+                const apt = busy ? getAppointmentForSlot(dayIndex, hour) : null;
+                const slotKey = `${dayIndex}-${hour}`;
+                
+                return (
+                  <div
+                    key={slotKey}
+                    className={`barber-mini-schedule__slot ${busy ? 'busy' : 'free'} ${isDaySelected(dayIndex) ? 'day-selected' : ''}`}
+                    style={busy ? { 
+                      background: `${barber.color}30`,
+                      borderColor: barber.color 
+                    } : {}}
+                    onMouseEnter={() => apt && setHoveredSlot({ ...apt, slotKey })}
+                    onMouseLeave={() => setHoveredSlot(null)}
+                  >
+                    {busy && <span className="barber-mini-schedule__slot-marker" style={{ background: barber.color }}></span>}
+                    
+                    {hoveredSlot?.slotKey === slotKey && apt && (
+                      <div className="barber-mini-schedule__tooltip">
+                        <strong>{formatTime(apt.startHour, apt.startMinute)}</strong>
+                        <span>{apt.service}</span>
+                        <span className="barber-mini-schedule__tooltip-duration">{apt.duration} min</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          ))}
+        </div>
+      </div>
+
+      <div className="barber-mini-schedule__footer">
+        <span>
+          Wolnych terminów w tym tygodniu: <strong>{(days.length * hours.length) - appointments.length}</strong>
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default BarberMiniSchedule;
+

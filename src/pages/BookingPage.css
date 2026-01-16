@@ -1,0 +1,54 @@
+.booking-page__hero {
+  padding: 160px 0 0;
+  background: var(--bg-secondary);
+  text-align: center;
+  position: relative;
+}
+
+.booking-page__hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201, 160, 80, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.booking-page__title {
+  font-size: clamp(3rem, 8vw, 5rem);
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.booking-page__intro {
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  position: relative;
+}
+
+.booking-page .booking {
+  padding-top: 60px;
+}
+
+.booking-page .booking__header {
+  display: none;
+}
+
+.booking-page__schedule {
+  background: var(--bg-primary);
+}
+
+.booking-page__schedule-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 20px;
+}
+
+.booking-page__schedule-description {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
