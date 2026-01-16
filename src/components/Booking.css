@@ -32,6 +32,7 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 48px;
+  overflow-x: hidden;
 }
 
 .booking__progress {
@@ -618,28 +619,36 @@
   
   .booking__combined-left {
     order: 1;
+    max-width: 100%;
   }
   
   .booking__combined-right {
     order: 2;
+    max-width: 100%;
+    overflow-x: auto;
   }
   
   .booking__barbers-vertical {
     flex-direction: column;
+    width: 100%;
   }
   
   .booking__barber-card-horizontal {
     flex-direction: row;
     width: 100%;
+    max-width: 100%;
     padding: 14px 16px;
+    box-sizing: border-box;
   }
   
   .booking__barber-info {
     text-align: left;
+    min-width: 0;
   }
   
   .booking__barber-check {
     margin-left: auto;
+    flex-shrink: 0;
   }
 }
 
