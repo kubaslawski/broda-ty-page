@@ -381,15 +381,36 @@
 
 @media (max-width: 768px) {
   .barber-mini-schedule {
-    padding: 16px;
+    padding: 14px;
+    margin-top: 16px;
+  }
+  
+  .barber-mini-schedule__header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .barber-mini-schedule__close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
   }
   
   .barber-mini-schedule__grid {
-    min-width: 380px;
+    min-width: 340px;
+    grid-template-columns: 40px repeat(6, 1fr);
   }
   
   .barber-mini-schedule__grid-wrapper {
-    max-height: 300px;
+    max-height: 280px;
+    margin: 0 -6px;
+    padding: 0 6px;
+  }
+  
+  .barber-mini-schedule__legend {
+    gap: 10px;
+    font-size: 0.7rem;
   }
   
   .barber-mini-schedule__legend-hint {
@@ -397,5 +418,51 @@
     margin-top: 8px;
     width: 100%;
     text-align: center;
+  }
+  
+  .barber-mini-schedule__day-name {
+    font-size: 0.55rem;
+  }
+  
+  .barber-mini-schedule__day-date {
+    font-size: 0.75rem;
+  }
+  
+  .barber-mini-schedule__time {
+    font-size: 0.55rem;
+    padding-right: 4px;
+  }
+  
+  .barber-mini-schedule__stats {
+    gap: 20px;
+  }
+  
+  .barber-mini-schedule__stat-value {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .barber-mini-schedule {
+    padding: 12px;
+  }
+  
+  .barber-mini-schedule__grid {
+    min-width: 300px;
+    grid-template-columns: 35px repeat(6, 1fr);
+  }
+  
+  .barber-mini-schedule__slot {
+    height: 16px;
+  }
+  
+  .barber-mini-schedule__time {
+    height: 16px;
+  }
+  
+  .barber-mini-schedule__apt-label,
+  .barber-mini-schedule__selected-label {
+    font-size: 0.5rem;
+    line-height: 16px;
   }
 }

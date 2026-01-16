@@ -650,7 +650,11 @@
 
 @media (max-width: 768px) {
   .booking__content {
-    padding: 32px 20px;
+    padding: 24px 16px;
+  }
+  
+  .booking__progress {
+    margin-bottom: 32px;
   }
   
   .booking__progress-label {
@@ -662,8 +666,15 @@
     right: 40px;
   }
   
+  .booking__step-title {
+    font-size: 1.25rem;
+  }
+  
   .booking__actions {
     flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
   }
   
   .booking__actions .btn {
@@ -673,5 +684,61 @@
   .booking__service-info-banner {
     flex-direction: column;
     text-align: center;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .booking__service-card {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .booking__service-price {
+    align-self: flex-end;
+  }
+  
+  .booking__summary {
+    padding: 20px 16px;
+  }
+  
+  .booking__summary-total span:last-child {
+    font-size: 1.25rem;
+  }
+  
+  .booking__confirmation {
+    padding: 40px 20px;
+  }
+  
+  .booking__confirmation h3 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking__content {
+    padding: 20px 12px;
+  }
+  
+  .booking__progress-number {
+    width: 36px;
+    height: 36px;
+    font-size: 0.8rem;
+  }
+  
+  .booking__progress-line {
+    top: 18px;
+    left: 30px;
+    right: 30px;
+  }
+  
+  .booking__barber-card-horizontal {
+    min-width: 100%;
+  }
+  
+  .booking__input-group input {
+    padding: 14px 16px;
+    font-size: 16px; /* Prevent zoom on iOS */
   }
 }

@@ -175,7 +175,38 @@
 @media (max-width: 768px) {
   .team__grid {
     grid-template-columns: 1fr;
-    max-width: 400px;
-    margin: 0 auto;
+    max-width: 100%;
+    gap: 24px;
+  }
+  
+  .team-card__image {
+    height: 220px;
+  }
+  
+  .team-card__avatar {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .team-card__avatar span {
+    font-size: 2.5rem;
+  }
+  
+  .team-card__content {
+    padding: 20px;
+  }
+  
+  .team-card__name {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .team__header {
+    margin-bottom: 40px;
+  }
+  
+  .team__description {
+    font-size: 1rem;
   }
 }

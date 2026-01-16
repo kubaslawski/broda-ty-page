@@ -52,3 +52,26 @@
   font-size: 1.1rem;
   line-height: 1.8;
 }
+
+@media (max-width: 768px) {
+  .booking-page__hero {
+    padding: 120px 0 0;
+  }
+  
+  .booking-page__title {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+  
+  .booking-page__intro {
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+  
+  .booking-page .booking {
+    padding-top: 40px;
+  }
+  
+  .booking-page__schedule-description {
+    font-size: 1rem;
+  }
+}

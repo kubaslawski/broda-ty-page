@@ -206,3 +206,33 @@ img {
 .fade-in {
   animation: fadeIn 0.8s ease forwards;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  :root {
+    --section-padding: 60px;
+  }
+  
+  .container {
+    padding: 0 16px;
+  }
+  
+  .section-title {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+  
+  .btn {
+    padding: 14px 28px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --section-padding: 48px;
+  }
+  
+  .container {
+    padding: 0 12px;
+  }
+}

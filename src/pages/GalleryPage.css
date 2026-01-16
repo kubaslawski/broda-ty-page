@@ -399,8 +399,32 @@
 }
 
 @media (max-width: 768px) {
+  .gallery-page__hero {
+    padding: 120px 0 60px;
+  }
+  
+  .gallery-page__title {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+  
+  .gallery-page__intro {
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+  
+  .gallery-page__filters {
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  
+  .gallery-page__filter {
+    padding: 10px 20px;
+    font-size: 0.75rem;
+  }
+  
   .gallery-page__grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   
   .gallery-item:nth-child(1),
@@ -415,19 +439,85 @@
   .gallery-item:nth-child(5),
   .gallery-item:nth-child(9) {
     grid-column: span 2;
-    grid-row: span 2;
+    grid-row: span 1;
+    aspect-ratio: 2/1;
+  }
+  
+  .gallery-item__overlay {
+    opacity: 1;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+    padding: 16px;
+  }
+  
+  .gallery-item__icon {
+    display: none;
+  }
+  
+  .gallery-item__title {
+    font-size: 1rem;
+    transform: none;
+  }
+  
+  .gallery-item__meta {
+    transform: none;
+    font-size: 0.7rem;
   }
   
   .gallery-lightbox {
-    padding: 20px;
+    padding: 12px;
+  }
+  
+  .gallery-lightbox__content {
+    max-height: 90vh;
+    overflow-y: auto;
   }
   
   .gallery-lightbox__nav {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+  }
+  
+  .gallery-lightbox__nav--prev {
+    left: 8px;
+  }
+  
+  .gallery-lightbox__nav--next {
+    right: 8px;
+  }
+  
+  .gallery-lightbox__info {
+    padding: 16px 20px;
+  }
+  
+  .gallery-lightbox__info h2 {
+    font-size: 1.25rem;
   }
   
   .gallery-page__cta-box {
-    padding: 40px 24px;
+    padding: 32px 20px;
+  }
+  
+  .gallery-page__cta-box h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-page__grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .gallery-item,
+  .gallery-item:nth-child(1),
+  .gallery-item:nth-child(5),
+  .gallery-item:nth-child(9) {
+    grid-column: span 1;
+    grid-row: span 1;
+    aspect-ratio: 4/3;
+  }
+  
+  .gallery-lightbox__image {
+    aspect-ratio: 4/3;
   }
 }

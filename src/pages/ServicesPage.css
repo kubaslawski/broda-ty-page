@@ -177,12 +177,51 @@
 }
 
 @media (max-width: 768px) {
+  .services-page__hero {
+    padding: 120px 0 60px;
+  }
+  
+  .services-page__title {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+  
+  .services-page__intro {
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+  
   .services-page__grid {
     grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .service-detail-card {
+    padding: 24px;
+  }
+  
+  .service-detail-card__header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .service-detail-card__price-tag {
+    text-align: left;
+  }
+  
+  .service-detail-card__title {
+    font-size: 1.25rem;
   }
   
   .services-page__cta-box {
-    padding: 40px 24px;
+    padding: 32px 20px;
+  }
+  
+  .services-page__cta-box h2 {
+    font-size: 1.5rem;
+  }
+  
+  .services-page__cta-box p {
+    font-size: 1rem;
   }
 }
 

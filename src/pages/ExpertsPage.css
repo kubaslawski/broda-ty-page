@@ -278,12 +278,77 @@
 }
 
 @media (max-width: 768px) {
-  .experts-page__values-grid {
-    grid-template-columns: 1fr;
+  .experts-page__hero {
+    padding: 120px 0 60px;
+  }
+  
+  .experts-page__title {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+  
+  .experts-page__intro {
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+  
+  .expert-card {
+    padding: 40px 0;
+    gap: 30px;
+  }
+  
+  .expert-card__avatar {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .expert-card__avatar span {
+    font-size: 4rem;
+  }
+  
+  .expert-card__name {
+    font-size: 2rem;
+  }
+  
+  .expert-card__bio {
+    font-size: 1rem;
+  }
+  
+  .expert-card__quote {
+    font-size: 1.1rem;
   }
   
   .expert-card__stats {
     justify-content: center;
+    gap: 24px;
+  }
+  
+  .expert-card__stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .experts-page__values-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .value-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .expert-card__avatar {
+    width: 130px;
+    height: 130px;
+  }
+  
+  .expert-card__avatar span {
+    font-size: 3rem;
+  }
+  
+  .expert-card__tag {
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
 }
 
