@@ -625,26 +625,21 @@
   }
   
   .booking__barbers-vertical {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
   }
   
   .booking__barber-card-horizontal {
-    flex: 1;
-    min-width: 140px;
-    flex-direction: column;
-    text-align: center;
-    padding: 16px 12px;
+    flex-direction: row;
+    width: 100%;
+    padding: 14px 16px;
   }
   
   .booking__barber-info {
-    text-align: center;
+    text-align: left;
   }
   
   .booking__barber-check {
-    position: absolute;
-    top: 8px;
-    right: 8px;
+    margin-left: auto;
   }
 }
 
@@ -734,7 +729,21 @@
   }
   
   .booking__barber-card-horizontal {
-    min-width: 100%;
+    padding: 12px 14px;
+  }
+  
+  .booking__barber-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .booking__barber-name {
+    font-size: 0.9rem;
+  }
+  
+  .booking__barber-specialty {
+    font-size: 0.65rem;
   }
   
   .booking__input-group input {
