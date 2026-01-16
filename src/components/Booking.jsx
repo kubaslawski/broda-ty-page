@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import './Booking.css';
-import BarberMiniSchedule from './BarberMiniSchedule';
+import BarberMiniSchedule, { getAppointmentsForBarber } from './BarberMiniSchedule';
 
 const services = [
   { id: 1, name: 'Strzyżenie włosów', price: 60, duration: 45 },
@@ -17,7 +17,7 @@ const barbers = [
   { id: 3, name: 'Kuba', specialty: 'Style Expert', color: '#3498db' }
 ];
 
-const hours = ['9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19'];
+const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 const minutes = ['00', '15', '30', '45'];
 
 const Booking = () => {
@@ -35,21 +35,91 @@ const Booking = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSchedulePreview, setShowSchedulePreview] = useState(false);
 
+  // Get busy slots for selected barber and date
+  const getBusySlots = useMemo(() => {
+    if (!booking.barber || !booking.date) return new Set();
+    
+    const appointments = getAppointmentsForBarber(booking.barber.name);
+    const selectedDate = new Date(booking.date);
+    const dayOfWeek = selectedDate.getDay();
+    const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday = 0
+    
+    const busySlots = new Set();
+    
+    appointments
+      .filter(apt => apt.day === dayIndex + 1)
+      .forEach(apt => {
+        const aptStartMinutes = apt.startHour * 60 + apt.startMinute;
+        const aptEndMinutes = aptStartMinutes + apt.duration;
+        
+        // Mark all 15-minute slots that overlap with this appointment as busy
+        for (let mins = aptStartMinutes; mins < aptEndMinutes; mins += 15) {
+          const h = Math.floor(mins / 60);
+          const m = mins % 60;
+          busySlots.add(`${h}:${m.toString().padStart(2, '0')}`);
+        }
+      });
+    
+    return busySlots;
+  }, [booking.barber, booking.date]);
+
+  // Check if a time slot is available for the selected service duration
+  const isSlotAvailable = (hour, minute) => {
+    if (!booking.service || !booking.barber || !booking.date) return true;
+    
+    const serviceDuration = booking.service.duration;
+    const slotStartMinutes = hour * 60 + parseInt(minute);
+    const slotEndMinutes = slotStartMinutes + serviceDuration;
+    
+    // Check if the service would go past closing time (19:00)
+    if (slotEndMinutes > 19 * 60) return false;
+    
+    // Check if any 15-minute slot within the service duration is busy
+    for (let mins = slotStartMinutes; mins < slotEndMinutes; mins += 15) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (getBusySlots.has(`${h}:${m.toString().padStart(2, '0')}`)) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  // Get appointment info for a busy slot
+  const getAppointmentForSlot = (hour, minute) => {
+    if (!booking.barber || !booking.date) return null;
+    
+    const appointments = getAppointmentsForBarber(booking.barber.name);
+    const selectedDate = new Date(booking.date);
+    const dayOfWeek = selectedDate.getDay();
+    const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    
+    const slotMinutes = hour * 60 + parseInt(minute);
+    
+    return appointments.find(apt => {
+      if (apt.day !== dayIndex + 1) return false;
+      const aptStartMinutes = apt.startHour * 60 + apt.startMinute;
+      const aptEndMinutes = aptStartMinutes + apt.duration;
+      return slotMinutes >= aptStartMinutes && slotMinutes < aptEndMinutes;
+    });
+  };
+
   const handleServiceSelect = (service) => {
-    setBooking({ ...booking, service });
+    setBooking({ ...booking, service, hour: '', minute: '' });
   };
 
   const handleBarberSelect = (barber) => {
-    setBooking({ ...booking, barber });
+    setBooking({ ...booking, barber, hour: '', minute: '' });
     setShowSchedulePreview(false);
   };
 
   const handleDateChange = (e) => {
-    setBooking({ ...booking, date: e.target.value });
+    setBooking({ ...booking, date: e.target.value, hour: '', minute: '' });
   };
 
   const handleHourSelect = (hour) => {
-    setBooking({ ...booking, hour });
+    setBooking({ ...booking, hour: hour.toString(), minute: '' });
   };
 
   const handleMinuteSelect = (minute) => {
@@ -106,6 +176,22 @@ const Booking = () => {
     return '';
   };
 
+  const getEndTime = () => {
+    if (booking.hour && booking.minute && booking.service) {
+      const startMinutes = parseInt(booking.hour) * 60 + parseInt(booking.minute);
+      const endMinutes = startMinutes + booking.service.duration;
+      const endHour = Math.floor(endMinutes / 60);
+      const endMin = endMinutes % 60;
+      return `${endHour}:${endMin.toString().padStart(2, '0')}`;
+    }
+    return '';
+  };
+
+  // Check if any minute slot is available for selected hour
+  const hasAvailableMinuteSlots = (hour) => {
+    return minutes.some(minute => isSlotAvailable(hour, minute));
+  };
+
   // Get minimum date (today)
   const today = new Date().toISOString().split('T')[0];
 
@@ -155,7 +241,13 @@ const Booking = () => {
                       >
                         <div className="booking__service-info">
                           <span className="booking__service-name">{service.name}</span>
-                          <span className="booking__service-duration">{service.duration} min</span>
+                          <span className="booking__service-duration">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <polyline points="12,6 12,12 16,14"/>
+                            </svg>
+                            {service.duration} min
+                          </span>
                         </div>
                         <span className="booking__service-price">{service.price} zł</span>
                       </button>
@@ -222,6 +314,19 @@ const Booking = () => {
                 <div className="booking__step">
                   <h3 className="booking__step-title">Wybierz termin</h3>
                   
+                  {/* Info about service duration */}
+                  {booking.service && (
+                    <div className="booking__service-info-banner">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                      Usługa <strong>{booking.service.name}</strong> trwa <strong>{booking.service.duration} min</strong>. 
+                      Niedostępne terminy są oznaczone jako zajęte.
+                    </div>
+                  )}
+                  
                   {/* Show mini schedule for selected barber */}
                   {booking.barber && (
                     <div className="booking__step-schedule">
@@ -247,18 +352,23 @@ const Booking = () => {
                     {booking.date && (
                       <div className="booking__time-selection">
                         <div className="booking__time-group">
-                          <label>Godzina</label>
+                          <label>Godzina rozpoczęcia</label>
                           <div className="booking__hour-grid">
-                            {hours.map((hour) => (
-                              <button
-                                key={hour}
-                                type="button"
-                                className={`booking__time-btn ${booking.hour === hour ? 'selected' : ''}`}
-                                onClick={() => handleHourSelect(hour)}
-                              >
-                                {hour}
-                              </button>
-                            ))}
+                            {hours.map((hour) => {
+                              const hasAvailable = hasAvailableMinuteSlots(hour);
+                              return (
+                                <button
+                                  key={hour}
+                                  type="button"
+                                  className={`booking__time-btn ${booking.hour === hour.toString() ? 'selected' : ''} ${!hasAvailable ? 'fully-booked' : ''}`}
+                                  onClick={() => hasAvailable && handleHourSelect(hour)}
+                                  disabled={!hasAvailable}
+                                >
+                                  {hour}:00
+                                  {!hasAvailable && <span className="booking__time-btn-badge">Zajęte</span>}
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                         
@@ -266,16 +376,33 @@ const Booking = () => {
                           <div className="booking__time-group">
                             <label>Minuty</label>
                             <div className="booking__minute-grid">
-                              {minutes.map((minute) => (
-                                <button
-                                  key={minute}
-                                  type="button"
-                                  className={`booking__time-btn booking__time-btn--minute ${booking.minute === minute ? 'selected' : ''}`}
-                                  onClick={() => handleMinuteSelect(minute)}
-                                >
-                                  :{minute}
-                                </button>
-                              ))}
+                              {minutes.map((minute) => {
+                                const available = isSlotAvailable(parseInt(booking.hour), minute);
+                                const apt = !available ? getAppointmentForSlot(parseInt(booking.hour), minute) : null;
+                                
+                                return (
+                                  <button
+                                    key={minute}
+                                    type="button"
+                                    className={`booking__time-btn booking__time-btn--minute ${booking.minute === minute ? 'selected' : ''} ${!available ? 'unavailable' : ''}`}
+                                    onClick={() => available && handleMinuteSelect(minute)}
+                                    disabled={!available}
+                                    title={apt ? `Zajęte: ${apt.service} (${apt.client})` : ''}
+                                  >
+                                    {booking.hour}:{minute}
+                                    {!available && (
+                                      <span className="booking__time-btn-status">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                          <circle cx="12" cy="12" r="10"/>
+                                          <line x1="15" y1="9" x2="9" y2="15"/>
+                                          <line x1="9" y1="9" x2="15" y2="15"/>
+                                        </svg>
+                                        Zajęte
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
                         )}
@@ -286,7 +413,10 @@ const Booking = () => {
                               <circle cx="12" cy="12" r="10"/>
                               <polyline points="12,6 12,12 16,14"/>
                             </svg>
-                            Wybrana godzina: <strong>{getFormattedTime()}</strong>
+                            <span>
+                              Wizyta: <strong>{getFormattedTime()}</strong> - <strong>{getEndTime()}</strong>
+                              <span className="booking__selected-time-duration">({booking.service?.duration} min)</span>
+                            </span>
                           </div>
                         )}
                       </div>
@@ -350,7 +480,7 @@ const Booking = () => {
                     </div>
                     <div className="booking__summary-row">
                       <span>Godzina:</span>
-                      <span>{getFormattedTime()}</span>
+                      <span>{getFormattedTime()} - {getEndTime()}</span>
                     </div>
                     <div className="booking__summary-row">
                       <span>Czas trwania:</span>
@@ -398,6 +528,10 @@ const Booking = () => {
             <p>
               Dziękujemy za rezerwację, <strong>{booking.name}</strong>!<br />
               Czekamy na Ciebie <strong>{new Date(booking.date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}</strong> o godzinie <strong>{getFormattedTime()}</strong>.
+            </p>
+            <p className="booking__confirmation-details">
+              Usługa: {booking.service?.name} ({booking.service?.duration} min)<br />
+              Specjalista: {booking.barber?.name}
             </p>
             <p className="booking__confirmation-note">
               Potwierdzenie zostanie wysłane SMS-em na numer {booking.phone}.

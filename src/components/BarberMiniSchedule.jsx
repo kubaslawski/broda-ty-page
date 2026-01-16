@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './BarberMiniSchedule.css';
 
-// Sample appointments data
+// Sample appointments data with precise times
 const sampleAppointments = {
   'Agata': [
     { id: 1, day: 1, startHour: 9, startMinute: 0, duration: 45, client: 'Marek K.', service: 'Strzyżenie włosów' },
@@ -52,9 +52,26 @@ const sampleAppointments = {
   ]
 };
 
+// Export appointments for use in Booking component
+export const getAppointmentsForBarber = (barberName) => {
+  return sampleAppointments[barberName] || [];
+};
+
 const days = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
 const fullDays = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
-const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+
+// Generate time slots every 15 minutes from 9:00 to 19:00
+const generateTimeSlots = () => {
+  const slots = [];
+  for (let hour = 9; hour < 19; hour++) {
+    for (let minute = 0; minute < 60; minute += 15) {
+      slots.push({ hour, minute });
+    }
+  }
+  return slots;
+};
+
+const timeSlots = generateTimeSlots();
 
 const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) => {
   const [hoveredSlot, setHoveredSlot] = useState(null);
@@ -76,32 +93,35 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
 
   const weekDates = getWeekDates();
 
-  // Check if a slot is busy
-  const isSlotBusy = (dayIndex, hour) => {
-    return appointments.some(apt => {
-      if (apt.day !== dayIndex + 1) return false;
+  // Check if a specific 15-min slot is busy
+  const getSlotStatus = (dayIndex, hour, minute) => {
+    const slotStartMinutes = hour * 60 + minute;
+    const slotEndMinutes = slotStartMinutes + 15;
+    
+    for (const apt of appointments) {
+      if (apt.day !== dayIndex + 1) continue;
+      
       const aptStartMinutes = apt.startHour * 60 + apt.startMinute;
       const aptEndMinutes = aptStartMinutes + apt.duration;
-      const slotStartMinutes = hour * 60;
-      const slotEndMinutes = (hour + 1) * 60;
-      return aptStartMinutes < slotEndMinutes && aptEndMinutes > slotStartMinutes;
-    });
-  };
-
-  // Get appointment for slot
-  const getAppointmentForSlot = (dayIndex, hour) => {
-    return appointments.find(apt => {
-      if (apt.day !== dayIndex + 1) return false;
-      const aptStartMinutes = apt.startHour * 60 + apt.startMinute;
-      const aptEndMinutes = aptStartMinutes + apt.duration;
-      const slotStartMinutes = hour * 60;
-      const slotEndMinutes = (hour + 1) * 60;
-      return aptStartMinutes < slotEndMinutes && aptEndMinutes > slotStartMinutes;
-    });
+      
+      // Check if this slot overlaps with the appointment
+      if (slotStartMinutes < aptEndMinutes && slotEndMinutes > aptStartMinutes) {
+        return { busy: true, appointment: apt };
+      }
+    }
+    
+    return { busy: false, appointment: null };
   };
 
   const formatTime = (hour, minute) => {
     return `${hour}:${minute.toString().padStart(2, '0')}`;
+  };
+
+  const getEndTime = (apt) => {
+    const totalMinutes = apt.startHour * 60 + apt.startMinute + apt.duration;
+    const endHour = Math.floor(totalMinutes / 60);
+    const endMinute = totalMinutes % 60;
+    return formatTime(endHour, endMinute);
   };
 
   // Check if day matches selected date
@@ -109,10 +129,26 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
     if (!selectedDate) return false;
     const date = new Date(selectedDate);
     const dayOfWeek = date.getDay();
-    // Convert Sunday=0 to Monday=0 based
     const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     return adjustedDay === dayIndex;
   };
+
+  // Count busy slots
+  const countBusySlots = () => {
+    let busyCount = 0;
+    for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
+      for (const slot of timeSlots) {
+        if (getSlotStatus(dayIndex, slot.hour, slot.minute).busy) {
+          busyCount++;
+        }
+      }
+    }
+    return busyCount;
+  };
+
+  const totalSlots = days.length * timeSlots.length;
+  const busySlots = countBusySlots();
+  const freeSlots = totalSlots - busySlots;
 
   return (
     <div className={`barber-mini-schedule ${compact ? 'barber-mini-schedule--compact' : ''}`}>
@@ -145,12 +181,17 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
           <span className="barber-mini-schedule__legend-dot barber-mini-schedule__legend-dot--busy" style={{ background: barber.color }}></span>
           Zajęte
         </div>
+        <div className="barber-mini-schedule__legend-info">
+          Sloty co 15 min
+        </div>
       </div>
 
       <div className="barber-mini-schedule__grid-wrapper">
         <div className="barber-mini-schedule__grid">
           {/* Header row with days */}
-          <div className="barber-mini-schedule__corner"></div>
+          <div className="barber-mini-schedule__corner">
+            <span>Godz.</span>
+          </div>
           {days.map((day, index) => (
             <div 
               key={day} 
@@ -161,35 +202,55 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
             </div>
           ))}
 
-          {/* Time rows */}
-          {hours.map((hour) => (
+          {/* Time rows - every 15 minutes */}
+          {timeSlots.map((slot, slotIndex) => (
             <>
-              <div key={`time-${hour}`} className="barber-mini-schedule__time">
-                {hour}:00
+              <div 
+                key={`time-${slot.hour}-${slot.minute}`} 
+                className={`barber-mini-schedule__time ${slot.minute === 0 ? 'barber-mini-schedule__time--hour' : ''}`}
+              >
+                {slot.minute === 0 ? `${slot.hour}:00` : ''}
               </div>
               {days.map((_, dayIndex) => {
-                const busy = isSlotBusy(dayIndex, hour);
-                const apt = busy ? getAppointmentForSlot(dayIndex, hour) : null;
-                const slotKey = `${dayIndex}-${hour}`;
+                const { busy, appointment } = getSlotStatus(dayIndex, slot.hour, slot.minute);
+                const slotKey = `${dayIndex}-${slot.hour}-${slot.minute}`;
+                
+                // Check if this is the start of an appointment
+                const isAppointmentStart = appointment && 
+                  appointment.startHour === slot.hour && 
+                  appointment.startMinute === slot.minute;
                 
                 return (
                   <div
                     key={slotKey}
-                    className={`barber-mini-schedule__slot ${busy ? 'busy' : 'free'} ${isDaySelected(dayIndex) ? 'day-selected' : ''}`}
+                    className={`barber-mini-schedule__slot ${busy ? 'busy' : 'free'} ${isDaySelected(dayIndex) ? 'day-selected' : ''} ${slot.minute === 0 ? 'hour-start' : ''}`}
                     style={busy ? { 
-                      background: `${barber.color}30`,
-                      borderColor: barber.color 
+                      background: `${barber.color}25`,
+                      borderLeftColor: barber.color 
                     } : {}}
-                    onMouseEnter={() => apt && setHoveredSlot({ ...apt, slotKey })}
+                    onMouseEnter={() => appointment && setHoveredSlot({ ...appointment, slotKey })}
                     onMouseLeave={() => setHoveredSlot(null)}
                   >
-                    {busy && <span className="barber-mini-schedule__slot-marker" style={{ background: barber.color }}></span>}
+                    {isAppointmentStart && (
+                      <div className="barber-mini-schedule__apt-label" style={{ color: barber.color }}>
+                        {formatTime(appointment.startHour, appointment.startMinute)}
+                      </div>
+                    )}
                     
-                    {hoveredSlot?.slotKey === slotKey && apt && (
+                    {hoveredSlot?.slotKey === slotKey && appointment && (
                       <div className="barber-mini-schedule__tooltip">
-                        <strong>{formatTime(apt.startHour, apt.startMinute)}</strong>
-                        <span>{apt.service}</span>
-                        <span className="barber-mini-schedule__tooltip-duration">{apt.duration} min</span>
+                        <div className="barber-mini-schedule__tooltip-header" style={{ borderColor: barber.color }}>
+                          <strong>{formatTime(appointment.startHour, appointment.startMinute)} - {getEndTime(appointment)}</strong>
+                        </div>
+                        <span className="barber-mini-schedule__tooltip-service">{appointment.service}</span>
+                        <span className="barber-mini-schedule__tooltip-client">{appointment.client}</span>
+                        <span className="barber-mini-schedule__tooltip-duration">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12,6 12,12 16,14"/>
+                          </svg>
+                          {appointment.duration} min
+                        </span>
                       </div>
                     )}
                   </div>
@@ -201,13 +262,19 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
       </div>
 
       <div className="barber-mini-schedule__footer">
-        <span>
-          Wolnych terminów w tym tygodniu: <strong>{(days.length * hours.length) - appointments.length}</strong>
-        </span>
+        <div className="barber-mini-schedule__stats">
+          <span className="barber-mini-schedule__stat">
+            <span className="barber-mini-schedule__stat-value" style={{ color: '#2ecc71' }}>{freeSlots}</span>
+            <span className="barber-mini-schedule__stat-label">wolnych</span>
+          </span>
+          <span className="barber-mini-schedule__stat">
+            <span className="barber-mini-schedule__stat-value" style={{ color: barber.color }}>{busySlots}</span>
+            <span className="barber-mini-schedule__stat-label">zajętych</span>
+          </span>
+        </div>
       </div>
     </div>
   );
 };
 
 export default BarberMiniSchedule;
-

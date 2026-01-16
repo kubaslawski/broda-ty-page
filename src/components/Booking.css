@@ -26,7 +26,7 @@
 }
 
 .booking__content {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -115,6 +115,28 @@
   margin-bottom: 32px;
 }
 
+.booking__service-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(201, 160, 80, 0.1);
+  border: 1px solid var(--border-accent);
+  border-radius: 10px;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.booking__service-info-banner svg {
+  color: var(--accent-gold);
+  flex-shrink: 0;
+}
+
+.booking__service-info-banner strong {
+  color: var(--accent-gold);
+}
+
 .booking__services {
   display: flex;
   flex-direction: column;
@@ -147,7 +169,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: 6px;
 }
 
 .booking__service-name {
@@ -156,8 +178,15 @@
 }
 
 .booking__service-duration {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.booking__service-duration svg {
+  color: var(--accent-gold);
 }
 
 .booking__service-price {
@@ -313,7 +342,7 @@
 
 .booking__hour-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
 
@@ -329,13 +358,18 @@
   border: 2px solid var(--border-color);
   border-radius: 8px;
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
-.booking__time-btn:hover {
+.booking__time-btn:hover:not(:disabled) {
   border-color: var(--border-accent);
   background: rgba(201, 160, 80, 0.05);
 }
@@ -344,6 +378,39 @@
   background: var(--accent-gold);
   border-color: var(--accent-gold);
   color: var(--bg-primary);
+}
+
+.booking__time-btn:disabled {
+  cursor: not-allowed;
+}
+
+.booking__time-btn.fully-booked {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.3);
+  color: var(--text-muted);
+}
+
+.booking__time-btn.unavailable {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.3);
+  color: var(--text-muted);
+}
+
+.booking__time-btn-badge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+.booking__time-btn-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  color: #e74c3c;
+  margin-top: 2px;
 }
 
 .booking__time-btn--minute {
@@ -356,20 +423,26 @@
   justify-content: center;
   gap: 10px;
   padding: 16px;
-  background: rgba(201, 160, 80, 0.1);
-  border: 1px solid var(--border-accent);
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.3);
   border-radius: 8px;
   color: var(--text-secondary);
   font-size: 1rem;
 }
 
 .booking__selected-time svg {
-  color: var(--accent-gold);
+  color: #2ecc71;
 }
 
 .booking__selected-time strong {
-  color: var(--accent-gold);
-  font-size: 1.25rem;
+  color: #2ecc71;
+  font-size: 1.1rem;
+}
+
+.booking__selected-time-duration {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-left: 4px;
 }
 
 .booking__contact {
@@ -510,6 +583,15 @@
   color: var(--accent-gold);
 }
 
+.booking__confirmation-details {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
 .booking__confirmation-note {
   font-size: 0.875rem;
   color: var(--text-muted);
@@ -535,7 +617,7 @@
   }
   
   .booking__hour-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
   
   .booking__minute-grid {
@@ -548,5 +630,10 @@
   
   .booking__actions .btn {
     width: 100%;
+  }
+  
+  .booking__service-info-banner {
+    flex-direction: column;
+    text-align: center;
   }
 }
