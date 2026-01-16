@@ -5,6 +5,21 @@ const Hero = () => {
   return (
     <section id="hero" className="hero">
       <div className="hero__bg">
+        {/* Video background */}
+        <video 
+          className="hero__video"
+          autoPlay 
+          muted 
+          loop 
+          playsInline
+          poster="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1920&q=80"
+        >
+          <source 
+            src="https://videos.pexels.com/video-files/7697116/7697116-uhd_2560_1440_30fps.mp4" 
+            type="video/mp4" 
+          />
+        </video>
+        <div className="hero__video-overlay"></div>
         <div className="hero__pattern"></div>
         <div className="hero__gradient"></div>
       </div>

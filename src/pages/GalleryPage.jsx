@@ -7,84 +7,84 @@ const galleryItems = [
     title: 'Classic Fade',
     category: 'włosy',
     barber: 'Kuba',
-    gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+    image: 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=800&q=80'
   },
   {
     id: 2,
     title: 'Gentleman\'s Beard',
     category: 'broda',
     barber: 'Magda',
-    gradient: 'linear-gradient(135deg, #2d132c 0%, #801336 50%, #c72c41 100%)'
+    image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=800&q=80'
   },
   {
     id: 3,
     title: 'Modern Pompadour',
     category: 'włosy',
     barber: 'Agata',
-    gradient: 'linear-gradient(135deg, #0a1628 0%, #1a365d 50%, #2c5282 100%)'
+    image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&q=80'
   },
   {
     id: 4,
     title: 'Full Transformation',
     category: 'kompleksowe',
     barber: 'Kuba',
-    gradient: 'linear-gradient(135deg, #1a1a1a 0%, #333333 50%, #4a4a4a 100%)'
+    image: 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=800&q=80'
   },
   {
     id: 5,
     title: 'Viking Style',
     category: 'broda',
     barber: 'Magda',
-    gradient: 'linear-gradient(135deg, #2c1810 0%, #5c3d2e 50%, #8b6914 100%)'
+    image: 'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=800&q=80'
   },
   {
     id: 6,
     title: 'Textured Crop',
     category: 'włosy',
     barber: 'Agata',
-    gradient: 'linear-gradient(135deg, #1e3a5f 0%, #2e5a8f 50%, #3e7abf 100%)'
+    image: 'https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=800&q=80'
   },
   {
     id: 7,
     title: 'Sharp Lines',
     category: 'broda',
     barber: 'Kuba',
-    gradient: 'linear-gradient(135deg, #1f1f1f 0%, #3d3d3d 50%, #5a5a5a 100%)'
+    image: 'https://images.unsplash.com/photo-1534297635766-a262cdcb8ee4?w=800&q=80'
   },
   {
     id: 8,
     title: 'Executive Cut',
     category: 'włosy',
     barber: 'Agata',
-    gradient: 'linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%)'
+    image: 'https://images.unsplash.com/photo-1596728325488-58c87691e9af?w=800&q=80'
   },
   {
     id: 9,
     title: 'Hipster Combo',
     category: 'kompleksowe',
     barber: 'Magda',
-    gradient: 'linear-gradient(135deg, #2b1a0e 0%, #5a3d2b 50%, #8b5a2b 100%)'
+    image: 'https://images.unsplash.com/photo-1517832606299-7ae9b720a186?w=800&q=80'
   },
   {
     id: 10,
     title: 'Skin Fade',
     category: 'włosy',
     barber: 'Kuba',
-    gradient: 'linear-gradient(135deg, #141414 0%, #2a2a2a 50%, #3f3f3f 100%)'
+    image: 'https://images.unsplash.com/photo-1593702288056-7927b442d0fa?w=800&q=80'
   },
   {
     id: 11,
     title: 'Natural Beard',
     category: 'broda',
     barber: 'Magda',
-    gradient: 'linear-gradient(135deg, #3d2914 0%, #6b4423 50%, #9a6b35 100%)'
+    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80'
   },
   {
     id: 12,
     title: 'Wedding Ready',
     category: 'kompleksowe',
     barber: 'Agata',
-    gradient: 'linear-gradient(135deg, #1a1a2e 0%, #2d2d4a 50%, #4a4a6a 100%)'
+    image: 'https://images.unsplash.com/photo-1612363148951-15f16817648f?w=800&q=80'
   }
 ];
 
@@ -98,10 +98,15 @@ const categories = [
 const GalleryPage = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedItem, setSelectedItem] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState({});
 
   const filteredItems = activeCategory === 'all' 
     ? galleryItems 
     : galleryItems.filter(item => item.category === activeCategory);
+
+  const handleImageLoad = (id) => {
+    setImageLoaded(prev => ({ ...prev, [id]: true }));
+  };
 
   return (
     <div className="gallery-page">
@@ -126,6 +131,11 @@ const GalleryPage = () => {
                 onClick={() => setActiveCategory(cat.id)}
               >
                 {cat.label}
+                {activeCategory === cat.id && (
+                  <span className="gallery-page__filter-count">
+                    {cat.id === 'all' ? galleryItems.length : galleryItems.filter(i => i.category === cat.id).length}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -134,19 +144,26 @@ const GalleryPage = () => {
             {filteredItems.map((item, index) => (
               <div
                 key={item.id}
-                className="gallery-item"
-                style={{ 
-                  animationDelay: `${index * 0.05}s`,
-                  background: item.gradient
-                }}
+                className={`gallery-item ${imageLoaded[item.id] ? 'loaded' : ''}`}
+                style={{ animationDelay: `${index * 0.05}s` }}
                 onClick={() => setSelectedItem(item)}
               >
+                <div className="gallery-item__image-wrapper">
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    loading="lazy"
+                    onLoad={() => handleImageLoad(item.id)}
+                  />
+                  <div className="gallery-item__shimmer"></div>
+                </div>
                 <div className="gallery-item__overlay">
                   <div className="gallery-item__icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <circle cx="12" cy="12" r="3"/>
-                      <path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>
-                      <path d="M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"/>
+                      <path d="m21 21-4.35-4.35"/>
+                      <line x1="11" y1="8" x2="11" y2="14"/>
+                      <line x1="8" y1="11" x2="14" y2="11"/>
                     </svg>
                   </div>
                   <h3 className="gallery-item__title">{item.title}</h3>
@@ -175,18 +192,8 @@ const GalleryPage = () => {
               </svg>
             </button>
             
-            <div 
-              className="gallery-lightbox__image"
-              style={{ background: selectedItem.gradient }}
-            >
-              <div className="gallery-lightbox__placeholder">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21,15 16,10 5,21"/>
-                </svg>
-                <span>Stylizacja: {selectedItem.title}</span>
-              </div>
+            <div className="gallery-lightbox__image">
+              <img src={selectedItem.image} alt={selectedItem.title} />
             </div>
             
             <div className="gallery-lightbox__info">
@@ -202,6 +209,34 @@ const GalleryPage = () => {
                 </span>
               </div>
             </div>
+            
+            {/* Navigation */}
+            <button 
+              className="gallery-lightbox__nav gallery-lightbox__nav--prev"
+              onClick={(e) => {
+                e.stopPropagation();
+                const currentIndex = filteredItems.findIndex(i => i.id === selectedItem.id);
+                const prevIndex = currentIndex === 0 ? filteredItems.length - 1 : currentIndex - 1;
+                setSelectedItem(filteredItems[prevIndex]);
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15,18 9,12 15,6"/>
+              </svg>
+            </button>
+            <button 
+              className="gallery-lightbox__nav gallery-lightbox__nav--next"
+              onClick={(e) => {
+                e.stopPropagation();
+                const currentIndex = filteredItems.findIndex(i => i.id === selectedItem.id);
+                const nextIndex = currentIndex === filteredItems.length - 1 ? 0 : currentIndex + 1;
+                setSelectedItem(filteredItems[nextIndex]);
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9,18 15,12 9,6"/>
+              </svg>
+            </button>
           </div>
         </div>
       )}
@@ -222,4 +257,3 @@ const GalleryPage = () => {
 };
 
 export default GalleryPage;
-

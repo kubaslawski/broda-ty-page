@@ -13,13 +13,31 @@
   z-index: 0;
 }
 
+.hero__video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+}
+
+.hero__video-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+}
+
 .hero__pattern {
   position: absolute;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 25% 25%, rgba(201, 160, 80, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(184, 115, 51, 0.03) 0%, transparent 50%),
-    linear-gradient(45deg, transparent 48%, rgba(201, 160, 80, 0.02) 49%, rgba(201, 160, 80, 0.02) 51%, transparent 52%);
+    radial-gradient(circle at 25% 25%, rgba(201, 160, 80, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(184, 115, 51, 0.05) 0%, transparent 50%),
+    linear-gradient(45deg, transparent 48%, rgba(201, 160, 80, 0.03) 49%, rgba(201, 160, 80, 0.03) 51%, transparent 52%);
   background-size: 100% 100%, 100% 100%, 60px 60px;
 }
 
@@ -27,8 +45,9 @@
   position: absolute;
   inset: 0;
   background: 
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201, 160, 80, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(74, 28, 46, 0.15) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201, 160, 80, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(74, 28, 46, 0.2) 0%, transparent 50%),
+    linear-gradient(to bottom, transparent 0%, rgba(10, 10, 10, 0.5) 100%);
 }
 
 .hero__content {
@@ -43,7 +62,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background: rgba(201, 160, 80, 0.1);
+  background: rgba(201, 160, 80, 0.15);
   border: 1px solid var(--border-accent);
   border-radius: 30px;
   font-size: 0.75rem;
@@ -52,6 +71,7 @@
   color: var(--accent-gold);
   margin-bottom: 32px;
   animation: fadeInUp 0.8s ease forwards;
+  backdrop-filter: blur(10px);
 }
 
 .hero__badge-icon {
@@ -65,6 +85,7 @@
   margin-bottom: 24px;
   animation: fadeInUp 0.8s ease 0.1s forwards;
   opacity: 0;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
 .hero__title-line {
@@ -104,6 +125,11 @@
   gap: 40px;
   animation: fadeInUp 0.8s ease 0.4s forwards;
   opacity: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 30px 50px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hero__stat {
@@ -192,6 +218,7 @@
   .hero__stats {
     flex-direction: column;
     gap: 24px;
+    padding: 24px 32px;
   }
   
   .hero__stat-divider {
@@ -204,4 +231,3 @@
     display: none;
   }
 }
-
