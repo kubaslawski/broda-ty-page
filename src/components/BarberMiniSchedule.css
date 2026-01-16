@@ -83,7 +83,7 @@
 .barber-mini-schedule__legend {
   display: flex;
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   font-size: 0.75rem;
   color: var(--text-muted);
   align-items: center;
@@ -116,35 +116,14 @@
   border: 1px solid #2ecc71;
 }
 
-.barber-mini-schedule__legend-info {
+.barber-mini-schedule__legend-hint {
   margin-left: auto;
   font-size: 0.7rem;
   color: var(--accent-gold);
   background: rgba(201, 160, 80, 0.1);
   padding: 4px 10px;
   border-radius: 4px;
-  font-weight: 500;
-}
-
-.barber-mini-schedule__service-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: rgba(46, 204, 113, 0.1);
-  border: 1px solid rgba(46, 204, 113, 0.3);
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.barber-mini-schedule__service-info svg {
-  color: #2ecc71;
-}
-
-.barber-mini-schedule__service-info strong {
-  color: #2ecc71;
+  border: 1px solid var(--border-accent);
 }
 
 .barber-mini-schedule__grid-wrapper {
@@ -212,7 +191,7 @@
   padding-right: 6px;
   font-size: 0.6rem;
   color: var(--text-muted);
-  height: 16px;
+  height: 18px;
   background: var(--bg-tertiary);
 }
 
@@ -222,7 +201,7 @@
 }
 
 .barber-mini-schedule__slot {
-  height: 16px;
+  height: 18px;
   position: relative;
   transition: all var(--transition-fast);
   cursor: default;
@@ -253,29 +232,35 @@
 }
 
 .barber-mini-schedule__slot.day-selected {
-  box-shadow: inset 0 0 0 1px var(--accent-gold);
+  box-shadow: inset 0 0 0 1px rgba(201, 160, 80, 0.3);
 }
 
-.barber-mini-schedule__slot.selectable {
+.barber-mini-schedule__slot.clickable {
   cursor: pointer;
 }
 
-.barber-mini-schedule__slot.selectable:hover {
+.barber-mini-schedule__slot.clickable:hover {
   background: rgba(46, 204, 113, 0.25) !important;
 }
 
-.barber-mini-schedule__slot.preview {
-  border-left-width: 3px;
-}
-
-.barber-mini-schedule__slot.selected {
-  border-left-width: 3px;
-  z-index: 5;
-}
-
-.barber-mini-schedule__slot.unavailable-for-service {
-  background: rgba(150, 150, 150, 0.1);
+.barber-mini-schedule__slot.cannot-fit {
+  background: rgba(231, 76, 60, 0.08);
   cursor: not-allowed;
+}
+
+.barber-mini-schedule__slot.in-range {
+  background: rgba(46, 204, 113, 0.4) !important;
+  border-left: 3px solid #2ecc71 !important;
+}
+
+.barber-mini-schedule__slot.range-start {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.barber-mini-schedule__slot.preview {
+  background: rgba(46, 204, 113, 0.2) !important;
+  border-left: 3px dashed #2ecc71 !important;
 }
 
 .barber-mini-schedule__apt-label {
@@ -285,18 +270,18 @@
   font-size: 0.55rem;
   font-weight: 600;
   white-space: nowrap;
-  line-height: 16px;
+  line-height: 18px;
 }
 
 .barber-mini-schedule__selected-label {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 0.6rem;
+  top: 0;
+  left: 4px;
+  font-size: 0.55rem;
   font-weight: 700;
+  white-space: nowrap;
+  line-height: 18px;
   color: #2ecc71;
-  line-height: 1;
 }
 
 .barber-mini-schedule__tooltip {
@@ -407,7 +392,10 @@
     max-height: 300px;
   }
   
-  .barber-mini-schedule__legend {
-    gap: 10px;
+  .barber-mini-schedule__legend-hint {
+    margin-left: 0;
+    margin-top: 8px;
+    width: 100%;
+    text-align: center;
   }
 }
