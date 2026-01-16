@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import './BarberMiniSchedule.css';
 
 // Sample appointments data with precise times
@@ -73,8 +73,17 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
-const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) => {
+const BarberMiniSchedule = ({ 
+  barber, 
+  onClose, 
+  compact = false, 
+  selectedDate,
+  serviceDuration = null,
+  onSlotSelect = null,
+  selectedSlot = null
+}) => {
   const [hoveredSlot, setHoveredSlot] = useState(null);
+  const [previewSlot, setPreviewSlot] = useState(null);
   
   const appointments = sampleAppointments[barber.name] || [];
 
@@ -87,7 +96,10 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
     return days.map((_, index) => {
       const date = new Date(monday);
       date.setDate(monday.getDate() + index);
-      return date.getDate();
+      return {
+        date: date.getDate(),
+        fullDate: date.toISOString().split('T')[0]
+      };
     });
   };
 
@@ -104,13 +116,52 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
       const aptStartMinutes = apt.startHour * 60 + apt.startMinute;
       const aptEndMinutes = aptStartMinutes + apt.duration;
       
-      // Check if this slot overlaps with the appointment
       if (slotStartMinutes < aptEndMinutes && slotEndMinutes > aptStartMinutes) {
         return { busy: true, appointment: apt };
       }
     }
     
     return { busy: false, appointment: null };
+  };
+
+  // Check if a slot is available for the service duration
+  const isSlotAvailableForService = (dayIndex, hour, minute) => {
+    if (!serviceDuration) return true;
+    
+    const slotStartMinutes = hour * 60 + minute;
+    const slotEndMinutes = slotStartMinutes + serviceDuration;
+    
+    // Check if service would go past closing time
+    if (slotEndMinutes > 19 * 60) return false;
+    
+    // Check all 15-minute slots within service duration
+    for (let mins = slotStartMinutes; mins < slotEndMinutes; mins += 15) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (getSlotStatus(dayIndex, h, m).busy) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  // Get slots that would be covered by a service starting at given slot
+  const getServiceSlots = (dayIndex, hour, minute) => {
+    if (!serviceDuration) return [];
+    
+    const slots = [];
+    const startMinutes = hour * 60 + minute;
+    const endMinutes = startMinutes + serviceDuration;
+    
+    for (let mins = startMinutes; mins < endMinutes; mins += 15) {
+      slots.push({
+        hour: Math.floor(mins / 60),
+        minute: mins % 60
+      });
+    }
+    
+    return slots;
   };
 
   const formatTime = (hour, minute) => {
@@ -133,6 +184,53 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
     return adjustedDay === dayIndex;
   };
 
+  // Get day index for selected date
+  const getSelectedDayIndex = () => {
+    if (!selectedDate) return -1;
+    const date = new Date(selectedDate);
+    const dayOfWeek = date.getDay();
+    return dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  };
+
+  // Check if slot is in preview range
+  const isInPreviewRange = (dayIndex, hour, minute) => {
+    if (!previewSlot || previewSlot.dayIndex !== dayIndex) return false;
+    
+    const previewSlots = getServiceSlots(previewSlot.dayIndex, previewSlot.hour, previewSlot.minute);
+    return previewSlots.some(s => s.hour === hour && s.minute === minute);
+  };
+
+  // Check if slot is selected
+  const isSlotSelected = (dayIndex, hour, minute) => {
+    if (!selectedSlot) return false;
+    
+    const selectedDayIndex = getSelectedDayIndex();
+    if (selectedDayIndex !== dayIndex) return false;
+    
+    if (!serviceDuration) {
+      return selectedSlot.hour === hour && selectedSlot.minute === minute;
+    }
+    
+    const selectedSlots = getServiceSlots(dayIndex, parseInt(selectedSlot.hour), parseInt(selectedSlot.minute));
+    return selectedSlots.some(s => s.hour === hour && s.minute === minute);
+  };
+
+  // Handle slot click
+  const handleSlotClick = (dayIndex, hour, minute) => {
+    if (!onSlotSelect || !serviceDuration) return;
+    if (!isSlotAvailableForService(dayIndex, hour, minute)) return;
+    
+    // Get the date for this day
+    const dateInfo = weekDates[dayIndex];
+    
+    onSlotSelect({
+      dayIndex,
+      hour,
+      minute,
+      date: dateInfo.fullDate
+    });
+  };
+
   // Count busy slots
   const countBusySlots = () => {
     let busyCount = 0;
@@ -150,8 +248,10 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
   const busySlots = countBusySlots();
   const freeSlots = totalSlots - busySlots;
 
+  const isInteractive = !!onSlotSelect && !!serviceDuration;
+
   return (
-    <div className={`barber-mini-schedule ${compact ? 'barber-mini-schedule--compact' : ''}`}>
+    <div className={`barber-mini-schedule ${compact ? 'barber-mini-schedule--compact' : ''} ${isInteractive ? 'barber-mini-schedule--interactive' : ''}`}>
       <div className="barber-mini-schedule__header">
         <div className="barber-mini-schedule__barber">
           <span 
@@ -181,10 +281,26 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
           <span className="barber-mini-schedule__legend-dot barber-mini-schedule__legend-dot--busy" style={{ background: barber.color }}></span>
           Zajęte
         </div>
+        {isInteractive && (
+          <div className="barber-mini-schedule__legend-item">
+            <span className="barber-mini-schedule__legend-dot barber-mini-schedule__legend-dot--selected"></span>
+            Wybrane
+          </div>
+        )}
         <div className="barber-mini-schedule__legend-info">
-          Sloty co 15 min
+          {isInteractive ? 'Kliknij aby wybrać termin' : 'Sloty co 15 min'}
         </div>
       </div>
+
+      {isInteractive && serviceDuration && (
+        <div className="barber-mini-schedule__service-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12,6 12,12 16,14"/>
+          </svg>
+          Czas trwania usługi: <strong>{serviceDuration} min</strong> ({Math.ceil(serviceDuration / 15)} slotów)
+        </div>
+      )}
 
       <div className="barber-mini-schedule__grid-wrapper">
         <div className="barber-mini-schedule__grid">
@@ -198,7 +314,7 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
               className={`barber-mini-schedule__day-header ${isDaySelected(index) ? 'selected' : ''}`}
             >
               <span className="barber-mini-schedule__day-name">{day}</span>
-              <span className="barber-mini-schedule__day-date">{weekDates[index]}</span>
+              <span className="barber-mini-schedule__day-date">{weekDates[index].date}</span>
             </div>
           ))}
 
@@ -215,25 +331,47 @@ const BarberMiniSchedule = ({ barber, onClose, compact = false, selectedDate }) 
                 const { busy, appointment } = getSlotStatus(dayIndex, slot.hour, slot.minute);
                 const slotKey = `${dayIndex}-${slot.hour}-${slot.minute}`;
                 
-                // Check if this is the start of an appointment
                 const isAppointmentStart = appointment && 
                   appointment.startHour === slot.hour && 
                   appointment.startMinute === slot.minute;
                 
+                const canSelect = isInteractive && !busy && isSlotAvailableForService(dayIndex, slot.hour, slot.minute);
+                const inPreview = isInPreviewRange(dayIndex, slot.hour, slot.minute);
+                const isSelected = isSlotSelected(dayIndex, slot.hour, slot.minute);
+                
                 return (
                   <div
                     key={slotKey}
-                    className={`barber-mini-schedule__slot ${busy ? 'busy' : 'free'} ${isDaySelected(dayIndex) ? 'day-selected' : ''} ${slot.minute === 0 ? 'hour-start' : ''}`}
+                    className={`barber-mini-schedule__slot ${busy ? 'busy' : 'free'} ${isDaySelected(dayIndex) ? 'day-selected' : ''} ${slot.minute === 0 ? 'hour-start' : ''} ${canSelect ? 'selectable' : ''} ${inPreview ? 'preview' : ''} ${isSelected ? 'selected' : ''} ${isInteractive && !busy && !canSelect ? 'unavailable-for-service' : ''}`}
                     style={busy ? { 
                       background: `${barber.color}25`,
                       borderLeftColor: barber.color 
+                    } : isSelected ? {
+                      background: 'rgba(46, 204, 113, 0.4)',
+                      borderLeftColor: '#2ecc71'
+                    } : inPreview ? {
+                      background: 'rgba(46, 204, 113, 0.2)',
+                      borderLeftColor: '#2ecc71'
                     } : {}}
-                    onMouseEnter={() => appointment && setHoveredSlot({ ...appointment, slotKey })}
-                    onMouseLeave={() => setHoveredSlot(null)}
+                    onMouseEnter={() => {
+                      if (appointment) setHoveredSlot({ ...appointment, slotKey });
+                      if (canSelect) setPreviewSlot({ dayIndex, hour: slot.hour, minute: slot.minute });
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredSlot(null);
+                      setPreviewSlot(null);
+                    }}
+                    onClick={() => canSelect && handleSlotClick(dayIndex, slot.hour, slot.minute)}
                   >
                     {isAppointmentStart && (
                       <div className="barber-mini-schedule__apt-label" style={{ color: barber.color }}>
                         {formatTime(appointment.startHour, appointment.startMinute)}
+                      </div>
+                    )}
+                    
+                    {isSelected && slot.hour === parseInt(selectedSlot?.hour) && slot.minute === parseInt(selectedSlot?.minute) && (
+                      <div className="barber-mini-schedule__selected-label">
+                        ✓
                       </div>
                     )}
                     

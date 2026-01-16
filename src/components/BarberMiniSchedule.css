@@ -12,6 +12,10 @@
   margin-bottom: 24px;
 }
 
+.barber-mini-schedule--interactive {
+  border-color: var(--border-accent);
+}
+
 .barber-mini-schedule__header {
   display: flex;
   justify-content: space-between;
@@ -78,9 +82,9 @@
 
 .barber-mini-schedule__legend {
   display: flex;
-  gap: 20px;
-  margin-bottom: 16px;
-  font-size: 0.8rem;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 0.75rem;
   color: var(--text-muted);
   align-items: center;
   flex-wrap: wrap;
@@ -107,13 +111,40 @@
   opacity: 0.8;
 }
 
+.barber-mini-schedule__legend-dot--selected {
+  background: rgba(46, 204, 113, 0.6);
+  border: 1px solid #2ecc71;
+}
+
 .barber-mini-schedule__legend-info {
   margin-left: auto;
   font-size: 0.7rem;
-  color: var(--text-muted);
-  background: var(--bg-secondary);
-  padding: 4px 8px;
+  color: var(--accent-gold);
+  background: rgba(201, 160, 80, 0.1);
+  padding: 4px 10px;
   border-radius: 4px;
+  font-weight: 500;
+}
+
+.barber-mini-schedule__service-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.barber-mini-schedule__service-info svg {
+  color: #2ecc71;
+}
+
+.barber-mini-schedule__service-info strong {
+  color: #2ecc71;
 }
 
 .barber-mini-schedule__grid-wrapper {
@@ -225,6 +256,28 @@
   box-shadow: inset 0 0 0 1px var(--accent-gold);
 }
 
+.barber-mini-schedule__slot.selectable {
+  cursor: pointer;
+}
+
+.barber-mini-schedule__slot.selectable:hover {
+  background: rgba(46, 204, 113, 0.25) !important;
+}
+
+.barber-mini-schedule__slot.preview {
+  border-left-width: 3px;
+}
+
+.barber-mini-schedule__slot.selected {
+  border-left-width: 3px;
+  z-index: 5;
+}
+
+.barber-mini-schedule__slot.unavailable-for-service {
+  background: rgba(150, 150, 150, 0.1);
+  cursor: not-allowed;
+}
+
 .barber-mini-schedule__apt-label {
   position: absolute;
   top: 0;
@@ -233,6 +286,17 @@
   font-weight: 600;
   white-space: nowrap;
   line-height: 16px;
+}
+
+.barber-mini-schedule__selected-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #2ecc71;
+  line-height: 1;
 }
 
 .barber-mini-schedule__tooltip {
@@ -341,5 +405,9 @@
   
   .barber-mini-schedule__grid-wrapper {
     max-height: 300px;
+  }
+  
+  .barber-mini-schedule__legend {
+    gap: 10px;
   }
 }

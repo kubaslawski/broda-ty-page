@@ -33,7 +33,6 @@ const Booking = () => {
     email: ''
   });
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showSchedulePreview, setShowSchedulePreview] = useState(false);
 
   // Get busy slots for selected barber and date
   const getBusySlots = useMemo(() => {
@@ -42,7 +41,7 @@ const Booking = () => {
     const appointments = getAppointmentsForBarber(booking.barber.name);
     const selectedDate = new Date(booking.date);
     const dayOfWeek = selectedDate.getDay();
-    const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday = 0
+    const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     
     const busySlots = new Set();
     
@@ -52,7 +51,6 @@ const Booking = () => {
         const aptStartMinutes = apt.startHour * 60 + apt.startMinute;
         const aptEndMinutes = aptStartMinutes + apt.duration;
         
-        // Mark all 15-minute slots that overlap with this appointment as busy
         for (let mins = aptStartMinutes; mins < aptEndMinutes; mins += 15) {
           const h = Math.floor(mins / 60);
           const m = mins % 60;
@@ -63,7 +61,6 @@ const Booking = () => {
     return busySlots;
   }, [booking.barber, booking.date]);
 
-  // Check if a time slot is available for the selected service duration
   const isSlotAvailable = (hour, minute) => {
     if (!booking.service || !booking.barber || !booking.date) return true;
     
@@ -71,10 +68,8 @@ const Booking = () => {
     const slotStartMinutes = hour * 60 + parseInt(minute);
     const slotEndMinutes = slotStartMinutes + serviceDuration;
     
-    // Check if the service would go past closing time (19:00)
     if (slotEndMinutes > 19 * 60) return false;
     
-    // Check if any 15-minute slot within the service duration is busy
     for (let mins = slotStartMinutes; mins < slotEndMinutes; mins += 15) {
       const h = Math.floor(mins / 60);
       const m = mins % 60;
@@ -86,7 +81,6 @@ const Booking = () => {
     return true;
   };
 
-  // Get appointment info for a busy slot
   const getAppointmentForSlot = (hour, minute) => {
     if (!booking.barber || !booking.date) return null;
     
@@ -111,7 +105,6 @@ const Booking = () => {
 
   const handleBarberSelect = (barber) => {
     setBooking({ ...booking, barber, hour: '', minute: '' });
-    setShowSchedulePreview(false);
   };
 
   const handleDateChange = (e) => {
@@ -131,7 +124,7 @@ const Booking = () => {
   };
 
   const nextStep = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < 3) setStep(step + 1);
   };
 
   const prevStep = () => {
@@ -156,15 +149,13 @@ const Booking = () => {
     });
     setStep(1);
     setShowConfirmation(false);
-    setShowSchedulePreview(false);
   };
 
   const canProceed = () => {
     switch (step) {
       case 1: return booking.service !== null;
-      case 2: return booking.barber !== null;
-      case 3: return booking.date !== '' && booking.hour !== '' && booking.minute !== '';
-      case 4: return booking.name !== '' && booking.phone !== '';
+      case 2: return booking.barber !== null && booking.date !== '' && booking.hour !== '' && booking.minute !== '';
+      case 3: return booking.name !== '' && booking.phone !== '';
       default: return false;
     }
   };
@@ -187,12 +178,10 @@ const Booking = () => {
     return '';
   };
 
-  // Check if any minute slot is available for selected hour
   const hasAvailableMinuteSlots = (hour) => {
     return minutes.some(minute => isSlotAvailable(hour, minute));
   };
 
-  // Get minimum date (today)
   const today = new Date().toISOString().split('T')[0];
 
   return (
@@ -210,19 +199,18 @@ const Booking = () => {
         {!showConfirmation ? (
           <div className="booking__content">
             <div className="booking__progress">
-              {[1, 2, 3, 4].map((s) => (
+              {[1, 2, 3].map((s) => (
                 <div key={s} className={`booking__progress-step ${step >= s ? 'active' : ''} ${step === s ? 'current' : ''}`}>
                   <span className="booking__progress-number">{s}</span>
                   <span className="booking__progress-label">
                     {s === 1 && 'Usługa'}
-                    {s === 2 && 'Specjalista'}
-                    {s === 3 && 'Termin'}
-                    {s === 4 && 'Dane'}
+                    {s === 2 && 'Specjalista i termin'}
+                    {s === 3 && 'Dane'}
                   </span>
                 </div>
               ))}
               <div className="booking__progress-line">
-                <div className="booking__progress-fill" style={{ width: `${((step - 1) / 3) * 100}%` }}></div>
+                <div className="booking__progress-fill" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
               </div>
             </div>
 
@@ -256,65 +244,12 @@ const Booking = () => {
                 </div>
               )}
 
-              {/* Step 2: Barber Selection */}
+              {/* Step 2: Barber & Time Selection Combined */}
               {step === 2 && (
-                <div className="booking__step">
-                  <h3 className="booking__step-title">Wybierz specjalistę</h3>
-                  <div className="booking__barbers">
-                    {barbers.map((barber) => (
-                      <div key={barber.id} className="booking__barber-wrapper">
-                        <button
-                          type="button"
-                          className={`booking__barber-card ${booking.barber?.id === barber.id ? 'selected' : ''}`}
-                          onClick={() => handleBarberSelect(barber)}
-                          style={{ '--barber-color': barber.color }}
-                        >
-                          <div className="booking__barber-avatar" style={{ background: barber.color }}>
-                            {barber.name.charAt(0)}
-                          </div>
-                          <div className="booking__barber-info">
-                            <span className="booking__barber-name">{barber.name}</span>
-                            <span className="booking__barber-specialty">{barber.specialty}</span>
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          className="booking__barber-schedule-btn"
-                          onClick={() => {
-                            handleBarberSelect(barber);
-                            setShowSchedulePreview(true);
-                          }}
-                          style={{ color: barber.color }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6"/>
-                            <line x1="8" y1="2" x2="8" y2="6"/>
-                            <line x1="3" y1="10" x2="21" y2="10"/>
-                          </svg>
-                          Zobacz grafik
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                <div className="booking__step booking__step--combined">
+                  <h3 className="booking__step-title">Wybierz specjalistę i termin</h3>
                   
-                  {showSchedulePreview && booking.barber && (
-                    <div className="booking__schedule-preview">
-                      <BarberMiniSchedule 
-                        barber={booking.barber} 
-                        onClose={() => setShowSchedulePreview(false)}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Step 3: Date & Time Selection */}
-              {step === 3 && (
-                <div className="booking__step">
-                  <h3 className="booking__step-title">Wybierz termin</h3>
-                  
-                  {/* Info about service duration */}
+                  {/* Service info banner */}
                   {booking.service && (
                     <div className="booking__service-info-banner">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -322,111 +257,160 @@ const Booking = () => {
                         <line x1="12" y1="16" x2="12" y2="12"/>
                         <line x1="12" y1="8" x2="12.01" y2="8"/>
                       </svg>
-                      Usługa <strong>{booking.service.name}</strong> trwa <strong>{booking.service.duration} min</strong>. 
-                      Niedostępne terminy są oznaczone jako zajęte.
+                      Wybrana usługa: <strong>{booking.service.name}</strong> ({booking.service.duration} min, {booking.service.price} zł)
                     </div>
                   )}
-                  
-                  {/* Show mini schedule for selected barber */}
-                  {booking.barber && (
-                    <div className="booking__step-schedule">
-                      <BarberMiniSchedule 
-                        barber={booking.barber} 
-                        compact={true}
-                        selectedDate={booking.date}
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="booking__datetime">
-                    <div className="booking__date-picker">
-                      <label>Data</label>
-                      <input
-                        type="date"
-                        value={booking.date}
-                        onChange={handleDateChange}
-                        min={today}
-                      />
-                    </div>
-                    
-                    {booking.date && (
-                      <div className="booking__time-selection">
-                        <div className="booking__time-group">
-                          <label>Godzina rozpoczęcia</label>
-                          <div className="booking__hour-grid">
-                            {hours.map((hour) => {
-                              const hasAvailable = hasAvailableMinuteSlots(hour);
-                              return (
-                                <button
-                                  key={hour}
-                                  type="button"
-                                  className={`booking__time-btn ${booking.hour === hour.toString() ? 'selected' : ''} ${!hasAvailable ? 'fully-booked' : ''}`}
-                                  onClick={() => hasAvailable && handleHourSelect(hour)}
-                                  disabled={!hasAvailable}
-                                >
-                                  {hour}:00
-                                  {!hasAvailable && <span className="booking__time-btn-badge">Zajęte</span>}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        
-                        {booking.hour && (
-                          <div className="booking__time-group">
-                            <label>Minuty</label>
-                            <div className="booking__minute-grid">
-                              {minutes.map((minute) => {
-                                const available = isSlotAvailable(parseInt(booking.hour), minute);
-                                const apt = !available ? getAppointmentForSlot(parseInt(booking.hour), minute) : null;
-                                
-                                return (
-                                  <button
-                                    key={minute}
-                                    type="button"
-                                    className={`booking__time-btn booking__time-btn--minute ${booking.minute === minute ? 'selected' : ''} ${!available ? 'unavailable' : ''}`}
-                                    onClick={() => available && handleMinuteSelect(minute)}
-                                    disabled={!available}
-                                    title={apt ? `Zajęte: ${apt.service} (${apt.client})` : ''}
-                                  >
-                                    {booking.hour}:{minute}
-                                    {!available && (
-                                      <span className="booking__time-btn-status">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                          <circle cx="12" cy="12" r="10"/>
-                                          <line x1="15" y1="9" x2="9" y2="15"/>
-                                          <line x1="9" y1="9" x2="15" y2="15"/>
-                                        </svg>
-                                        Zajęte
-                                      </span>
-                                    )}
-                                  </button>
-                                );
-                              })}
+
+                  <div className="booking__combined-layout">
+                    {/* Left side: Barber selection */}
+                    <div className="booking__combined-left">
+                      <label className="booking__combined-label">Specjalista</label>
+                      <div className="booking__barbers-vertical">
+                        {barbers.map((barber) => (
+                          <button
+                            key={barber.id}
+                            type="button"
+                            className={`booking__barber-card-horizontal ${booking.barber?.id === barber.id ? 'selected' : ''}`}
+                            onClick={() => handleBarberSelect(barber)}
+                            style={{ '--barber-color': barber.color }}
+                          >
+                            <div className="booking__barber-avatar" style={{ background: barber.color }}>
+                              {barber.name.charAt(0)}
                             </div>
-                          </div>
-                        )}
-                        
-                        {booking.hour && booking.minute && (
-                          <div className="booking__selected-time">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="12" r="10"/>
-                              <polyline points="12,6 12,12 16,14"/>
-                            </svg>
-                            <span>
-                              Wizyta: <strong>{getFormattedTime()}</strong> - <strong>{getEndTime()}</strong>
-                              <span className="booking__selected-time-duration">({booking.service?.duration} min)</span>
-                            </span>
-                          </div>
-                        )}
+                            <div className="booking__barber-info">
+                              <span className="booking__barber-name">{barber.name}</span>
+                              <span className="booking__barber-specialty">{barber.specialty}</span>
+                            </div>
+                            {booking.barber?.id === barber.id && (
+                              <span className="booking__barber-check">✓</span>
+                            )}
+                          </button>
+                        ))}
                       </div>
-                    )}
+
+                      {/* Date picker */}
+                      <div className="booking__date-picker">
+                        <label className="booking__combined-label">Data wizyty</label>
+                        <input
+                          type="date"
+                          value={booking.date}
+                          onChange={handleDateChange}
+                          min={today}
+                          disabled={!booking.barber}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Right side: Schedule & Time selection */}
+                    <div className="booking__combined-right">
+                      {booking.barber ? (
+                        <>
+                          <div className="booking__schedule-container">
+                            <BarberMiniSchedule 
+                              barber={booking.barber} 
+                              compact={true}
+                              selectedDate={booking.date}
+                            />
+                          </div>
+
+                          {booking.date && (
+                            <div className="booking__time-selection">
+                              <label className="booking__combined-label">Wybierz godzinę</label>
+                              <div className="booking__hour-grid">
+                                {hours.map((hour) => {
+                                  const hasAvailable = hasAvailableMinuteSlots(hour);
+                                  return (
+                                    <button
+                                      key={hour}
+                                      type="button"
+                                      className={`booking__time-btn ${booking.hour === hour.toString() ? 'selected' : ''} ${!hasAvailable ? 'fully-booked' : ''}`}
+                                      onClick={() => hasAvailable && handleHourSelect(hour)}
+                                      disabled={!hasAvailable}
+                                    >
+                                      {hour}:00
+                                      {!hasAvailable && <span className="booking__time-btn-badge">Zajęte</span>}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              
+                              {booking.hour && (
+                                <div className="booking__minute-selection">
+                                  <label className="booking__combined-label">Minuty</label>
+                                  <div className="booking__minute-grid">
+                                    {minutes.map((minute) => {
+                                      const available = isSlotAvailable(parseInt(booking.hour), minute);
+                                      const apt = !available ? getAppointmentForSlot(parseInt(booking.hour), minute) : null;
+                                      
+                                      return (
+                                        <button
+                                          key={minute}
+                                          type="button"
+                                          className={`booking__time-btn booking__time-btn--minute ${booking.minute === minute ? 'selected' : ''} ${!available ? 'unavailable' : ''}`}
+                                          onClick={() => available && handleMinuteSelect(minute)}
+                                          disabled={!available}
+                                          title={apt ? `Zajęte: ${apt.service}` : ''}
+                                        >
+                                          {booking.hour}:{minute}
+                                          {!available && (
+                                            <span className="booking__time-btn-status">
+                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                                <line x1="9" y1="9" x2="15" y2="15"/>
+                                              </svg>
+                                            </span>
+                                          )}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {booking.hour && booking.minute && (
+                                <div className="booking__selected-time">
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                  </svg>
+                                  <span>
+                                    <strong>{booking.barber.name}</strong> • {getFormattedTime()} - {getEndTime()}
+                                    <span className="booking__selected-time-duration">({booking.service?.duration} min)</span>
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {!booking.date && (
+                            <div className="booking__placeholder">
+                              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                              </svg>
+                              <p>Wybierz datę, aby zobaczyć dostępne godziny</p>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="booking__placeholder">
+                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                          </svg>
+                          <p>Wybierz specjalistę, aby zobaczyć jego grafik</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Step 4: Contact Details */}
-              {step === 4 && (
+              {/* Step 3: Contact Details */}
+              {step === 3 && (
                 <div className="booking__step">
                   <h3 className="booking__step-title">Twoje dane</h3>
                   <div className="booking__contact">
@@ -465,7 +449,7 @@ const Booking = () => {
                   </div>
                   
                   <div className="booking__summary">
-                    <h4>Podsumowanie</h4>
+                    <h4>Podsumowanie rezerwacji</h4>
                     <div className="booking__summary-row">
                       <span>Usługa:</span>
                       <span>{booking.service?.name}</span>
@@ -500,7 +484,7 @@ const Booking = () => {
                     Wstecz
                   </button>
                 )}
-                {step < 4 ? (
+                {step < 3 ? (
                   <button
                     type="button"
                     className="btn btn-primary"
